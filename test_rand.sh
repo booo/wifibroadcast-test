@@ -26,7 +26,7 @@ do
       # Spawn a child process:
       (cat /dev/zero | ${WFB_DIR}/tx -i ${mcs} -r ${FEC_r} -b ${FEC_d} ${INTERFACE}) &
       sleep ${WORK_TIME}
-      killall tx
+      killall tx &
       # buffer for rx
       sleep $((${BREAK} + ${WARM_UP}))
     else
@@ -36,9 +36,9 @@ do
       (${WFB_DIR}/rx -r ${FEC_r} -b ${FEC_d} ${INTERFACE} > "${DATA_DIR}/searchwing-${testid}.data") & pid=$!
       (${WFB_DIR}/rx_status_csv -f "${DATA_DIR}/searchwing-debug-${testid}.csv") &
       sleep $((${WORK_TIME} + ${WARM_UP} + ${WARM_UP}))
-      killall rx
-      killall tcpdump
-      killall rx_status_csv
+      killall rx &
+      killall tcpdump &
+      killall rx_status_csv &
       sleep ${BREAK}
     fi
     read up rest </proc/uptime; end="${up%.*}${up#*.}"
