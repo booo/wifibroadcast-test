@@ -1,6 +1,6 @@
 INTERFACE="wlan0"
 DATA_DIR="/tmp/searchwing-wifibroadcast-test"
-WFB_DIR=""
+WFB_DIR="/usr/bin/"
 BREAK=1
 WARM_UP=2
 WORK_TIME=4
@@ -17,7 +17,7 @@ do
     echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth}"
 
     #setup interface
-    iw dev ${INTERFACE} set channel ${CHANNEL} ${bandwidth}MHz &
+    iw dev ${INTERFACE} set channel ${CHANNEL} ${bandwidth} &
 
     if [ ${mode} == "tx" ]; then
       echo "starting transmitter"
