@@ -84,19 +84,36 @@ df_resultsNettoDataSize = pd.merge(df_tests.copy(), df_nettoDataSize,  how='left
 #plot
 plt_width=15
 plt_height=5
+
 ##datafiles
+plt_name = "wfb DataRateNetto Mbit_s"
 allTestPositons={testPositionsDirName : df_resultsNettoDataSize[df_resultsNettoDataSize.testPosition == testPositionsDirName].DataRateNetto.values for testPositionsDirName in testPositionsDirNames}
 df = pd.DataFrame(allTestPositons, index=df_tests['testdescr'])
 yticks = [1 * i for i in range(20)]
-ax = df.plot.bar(rot=90,grid=True, figsize=(plt_width,plt_height), yticks=yticks, title="DataRateNetto Mbit/s")
+ax = df.plot.bar(rot=90,grid=True, figsize=(plt_width,plt_height), yticks=yticks, title=plt_name)
+plt.tight_layout()
+plt.savefig( os.path.join(path,plt_name+'.png'))
 
 ##csv
-def plot_specific(df, colName):
+def plot_specific(df, colName, text):
+    plt_name = text + " " +colName
     allTestPositons={testPositionsDirName : df[df.testPosition == testPositionsDirName][colName].values for testPositionsDirName in testPositionsDirNames}
+    
     df_vis = pd.DataFrame(allTestPositons, index=df_tests['testdescr'])
-    ax = df_vis.plot.bar(rot=90, grid=True, figsize=(plt_width,plt_height), title=colName)
-    plt.subplots_adjust(hspace=0.5) 
+    df_vis.plot.bar(rot=90, grid=True, figsize=(plt_width,plt_height), title=plt_name)
+    plt.tight_layout()
+    plt.savefig( os.path.join(path,plt_name+'.png'))
+    
 
+for k in range(rxAdapterCount):
+    plot_specific(df_results[k],"mean_signal_dbm", "Ant"+str(k))
+    plot_specific(df_results[k],"received_packet_cnt", "Ant"+str(k))
+    plot_specific(df_results[k],"wrong_crc_cnt", "Ant"+str(k))
+    plot_specific(df_results[k],"lost_packets_cnt", "Ant"+str(k))
 
-plot_specific(df_results[0],"mean_signal_dbm")
+plot_specific(df_results[0],"fecs_used_cnt", "wfb")
+plot_specific(df_results[0],"received_block_cnt", "wfb")
+plot_specific(df_results[0],"damaged_block_cnt", "wfb")
+plot_specific(df_results[0],"tx_restart_cnt", "wfb")
+
 plt.show()
