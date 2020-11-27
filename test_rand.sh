@@ -1,5 +1,5 @@
-INTERFACE="wlan0"
-DATA_DIR="/tmp/searchwing-wifibroadcast-test"
+INTERFACE="mon0 mon1"
+DATA_DIR="/root/foo/searchwing-wifibroadcast-test"
 WFB_DIR="/usr/bin/"
 BREAK=1
 WARM_UP=2
@@ -9,15 +9,17 @@ CHANNEL=11
 mode=${2}
 
 mkdir -p ${DATA_DIR}
-
 while IFS=, read -r testid FEC_d FEC_r mcs Txpower stbc ldpc bandwidth
 do
     read up rest </proc/uptime; start="${up%.*}${up#*.}"
 
     echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth}"
+    
+
+    iw dev mon0 set channel ${CHANNEL} ${bandwidth} &
+    iw dev mon1 set channel ${CHANNEL} ${bandwidth} &
 
     #setup interface
-    iw dev ${INTERFACE} set channel ${CHANNEL} ${bandwidth} &
 
     if [ ${mode} == "tx" ]; then
       echo "starting transmitter"
@@ -32,7 +34,8 @@ do
     else
       echo "starting receiver"
       sleep ${BREAK}
-      (tcpdump -i ${INTERFACE} -w "${DATA_DIR}/searchwing-tcpdump-${testid}.pcap") & tcpdump_pid=$!
+      #(tcpdump -i mon0 -w "${DATA_DIR}/searchwing-tcpdump-mon0-${testid}.pcap") & tcpdump_pid=$!
+      #(tcpdump -i mon1 -w "${DATA_DIR}/searchwing-tcpdump-mon1-${testid}.pcap") & tcpdump_pid=$!
       (${WFB_DIR}/rx -r ${FEC_r} -b ${FEC_d} ${INTERFACE} > "${DATA_DIR}/searchwing-${testid}.data") & pid=$!
       (${WFB_DIR}/rx_status_csv -f "${DATA_DIR}/searchwing-debug-${testid}.csv") &
       sleep $((${WORK_TIME} + ${WARM_UP} + ${WARM_UP}))
@@ -46,3 +49,4 @@ do
     echo "Runtime: ${runtime}"
 
 done < ${1}
+
