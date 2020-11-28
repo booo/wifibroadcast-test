@@ -26,7 +26,7 @@ do
       # wait for the rx to start listening
       sleep $((${BREAK} + ${WARM_UP}))
       # Spawn a child process:
-      (cat /dev/zero | ${WFB_DIR}/tx -i ${mcs} -r ${FEC_r} -b ${FEC_d} ${INTERFACE}) &
+      (cat /dev/zero | ${WFB_DIR}/tx -i ${mcs} -r ${FEC_r} -b ${FEC_d} -c ${stbc} -l ${ldpc} ${INTERFACE}) &
       sleep ${WORK_TIME}
       killall tx &
       # buffer for rx
