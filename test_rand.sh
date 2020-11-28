@@ -3,8 +3,8 @@ DATA_DIR="/root/foo/searchwing-wifibroadcast-test"
 WFB_DIR="/usr/bin/"
 BREAK=1
 WARM_UP=2
-WORK_TIME=4
-CHANNEL=11
+WORK_TIME=30
+CHANNEL=1
 
 mode=${2}
 
