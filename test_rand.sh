@@ -34,8 +34,8 @@ do
     else
       echo "starting receiver"
       sleep ${BREAK}
-      #(tcpdump -i mon0 -w "${DATA_DIR}/searchwing-tcpdump-mon0-${testid}.pcap") & tcpdump_pid=$!
-      #(tcpdump -i mon1 -w "${DATA_DIR}/searchwing-tcpdump-mon1-${testid}.pcap") & tcpdump_pid=$!
+      (tcpdump -i mon0 -w "${DATA_DIR}/searchwing-tcpdump-mon0-${testid}.pcap") & tcpdump_pid=$!
+      (tcpdump -i mon1 -w "${DATA_DIR}/searchwing-tcpdump-mon1-${testid}.pcap") & tcpdump_pid=$!
       (${WFB_DIR}/rx -r ${FEC_r} -b ${FEC_d} ${INTERFACE} > "${DATA_DIR}/searchwing-${testid}.data") & pid=$!
       (${WFB_DIR}/rx_status_csv -f "${DATA_DIR}/searchwing-debug-${testid}.csv") &
       sleep $((${WORK_TIME} + ${WARM_UP} + ${WARM_UP}))
