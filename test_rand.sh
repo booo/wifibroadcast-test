@@ -9,12 +9,11 @@ CHANNEL=1
 mode=${2}
 
 mkdir -p ${DATA_DIR}
-while IFS=, read -r testid FEC_d FEC_r mcs Txpower stbc ldpc bandwidth
+while IFS=, read -r testid FEC_d FEC_r mcs Txpower stbc ldpc bandwidth mtu
 do
     read up rest </proc/uptime; start="${up%.*}${up#*.}"
 
-    echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth}"
-    
+    echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth} mtu ${mtu}"
 
     iw dev mon0 set channel ${CHANNEL} ${bandwidth} &
     iw dev mon1 set channel ${CHANNEL} ${bandwidth} &
@@ -26,7 +25,7 @@ do
       # wait for the rx to start listening
       sleep $((${BREAK} + ${WARM_UP}))
       # Spawn a child process:
-      (cat /dev/zero | ${WFB_DIR}/tx -i ${mcs} -r ${FEC_r} -b ${FEC_d} -c ${stbc} -l ${ldpc} ${INTERFACE}) &
+      (cat /dev/zero | ${WFB_DIR}/tx -i ${mcs} -r ${FEC_r} -b ${FEC_d} -c ${stbc} -l ${ldpc} -f ${mtu} ${INTERFACE}) &
       sleep ${WORK_TIME}
       killall tx &
       # buffer for rx
