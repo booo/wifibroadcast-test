@@ -4,19 +4,18 @@ WFB_DIR="/usr/bin/"
 BREAK=1
 WARM_UP=2
 WORK_TIME=30
-CHANNEL=1
 
 mode=${2}
 
 mkdir -p ${DATA_DIR}
-while IFS=, read -r testid FEC_d FEC_r mcs Txpower stbc ldpc bandwidth mtu
+while IFS=, read -r testid FEC_d FEC_r mcs Txpower stbc ldpc bandwidth mtu channel
 do
     read up rest </proc/uptime; start="${up%.*}${up#*.}"
 
-    echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth} mtu ${mtu}"
+    echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth} mtu ${mtu} channel: ${channel}"
 
-    iw dev mon0 set channel ${CHANNEL} ${bandwidth} &
-    iw dev mon1 set channel ${CHANNEL} ${bandwidth} &
+    iw dev mon0 set channel ${channel} ${bandwidth} &
+    iw dev mon1 set channel ${channel} ${bandwidth} &
 
     #setup interface
 
