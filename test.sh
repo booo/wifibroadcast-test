@@ -20,9 +20,10 @@ do
 
     echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth} mtu ${mtu} channel: ${channel}"
 
-    for if in $ifs
+    for if in ${ifs}
     do
-       iw dev $if set channel ${channel} ${bandwidth} &
+       iw dev ${if} set monitor otherbss fcsfail &
+       iw dev ${if} set channel ${channel} ${bandwidth} &
     done    
 
     #setup interface
@@ -40,9 +41,9 @@ do
       echo "starting receiver"
       sleep ${BREAK}
 
-      for if in $ifs
+      for if in ${ifs}
       do
-         (tcpdump -i $if -w "${DATA_DIR}/searchwing-tcpdump-mon0-${testid}.pcap") & tcpdump_pid=$!
+         (tcpdump -i ${if} -w "${DATA_DIR}/searchwing-tcpdump-mon0-${testid}.pcap") & tcpdump_pid=$!
       done
       
       (${WFB_DIR}/rx -r ${FEC_r} -b ${FEC_d} ${INTERFACE} > "${DATA_DIR}/searchwing-${testid}.data") & pid=$!
