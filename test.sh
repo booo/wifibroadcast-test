@@ -9,6 +9,9 @@ mode=${2}
 mkdir -p ${DATA_DIR}
 ifs=$(echo $INTERFACE | tr " " "\n")
 
+# disable jit
+sysctl net.core.bpf_jit_enable=0
+
 first=1
 while IFS=, read -r testid FEC_d FEC_r mcs Txpower stbc ldpc bandwidth mtu channel
 do
