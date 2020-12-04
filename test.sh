@@ -6,19 +6,26 @@ WARM_UP=2
 WORK_TIME=30
 
 mode=${2}
-
 mkdir -p ${DATA_DIR}
+ifs=$(echo $INTERFACE | tr " " "\n")
+
+first=1
 while IFS=, read -r testid FEC_d FEC_r mcs Txpower stbc ldpc bandwidth mtu channel
 do
     read up rest </proc/uptime; start="${up%.*}${up#*.}"
+    if [ ${first} == 1 ]; then
+	first=0
+        continue
+    fi
 
     echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth} mtu ${mtu} channel: ${channel}"
 
-    iw dev mon0 set channel ${channel} ${bandwidth} &
-    iw dev mon1 set channel ${channel} ${bandwidth} &
+    for if in $ifs
+    do
+       iw dev $if set channel ${channel} ${bandwidth} &
+    done    
 
     #setup interface
-
     if [ ${mode} == "tx" ]; then
       echo "starting transmitter"
       # wait for the rx to start listening
@@ -32,8 +39,12 @@ do
     else
       echo "starting receiver"
       sleep ${BREAK}
-      (tcpdump -i mon0 -w "${DATA_DIR}/searchwing-tcpdump-mon0-${testid}.pcap") & tcpdump_pid=$!
-      (tcpdump -i mon1 -w "${DATA_DIR}/searchwing-tcpdump-mon1-${testid}.pcap") & tcpdump_pid=$!
+
+      for if in $ifs
+      do
+         (tcpdump -i $if -w "${DATA_DIR}/searchwing-tcpdump-mon0-${testid}.pcap") & tcpdump_pid=$!
+      done
+      
       (${WFB_DIR}/rx -r ${FEC_r} -b ${FEC_d} ${INTERFACE} > "${DATA_DIR}/searchwing-${testid}.data") & pid=$!
       (${WFB_DIR}/rx_status_csv -f "${DATA_DIR}/searchwing-debug-${testid}.csv") &
       sleep $((${WORK_TIME} + ${WARM_UP} + ${WARM_UP}))
