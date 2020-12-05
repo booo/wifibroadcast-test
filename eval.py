@@ -5,27 +5,33 @@ from glob import glob
 import os
 import re
 
-worktime = 5 #[sek]
+worktime = 30 #[sek]
 rxAdapterCount = 2
 
 ##TODO add nettodata from niceblocks = recBlocks-brokenBlocks      * 8 * mtu
 ##TODO add good pakets received from = recPak - crcfail
+##TODO add ratio goodpkts/allpkts
+##TODO add double bar for rec pkts (goodpkts unter allpkts)
+##TODO plot noisefloor
 
 
 def getTestIdFromFilename(filename):
     return  int(re.findall(r'\d+', filename)[0])
 
-#read test descriptions
-df_tests = pd.read_csv("/home/julle/projects/SearchWing/Tests/20201119_WifiTestSetup/wifibroadcast-test/testids.csv")
-df_tests['testid'] = pd.to_numeric(df_tests['testid'])
-for i, row in df_tests.iterrows():
-    df_tests.at[i,'testdescr'] = "mcs"+ str(row['mcs'])+ " " + "f_r"+str(row['FEC_r'])+ " " +str(row['bandwidth']) + " " + "l" + str(row['ldpc'])+ " " + "s" + str(row['stbc'])
-
-
 #path to test results
-path="/home/julle/projects/SearchWing/Tests/20201119_WifiTestSetup/wfb-test-results/20201204_preRauenTest"
+path="/home/julle/projects/SearchWing/Tests/20201119_WifiTestSetup/wfb-test-results/20201128_Feld"
 testPositions = sorted(glob(path+"/*/"))
 testPositionsDirNames = [os.path.basename(os.path.normpath(path)) for path in testPositions]
+
+
+#read test descriptions
+testIdsPath = os.path.join(path,"testids.csv")
+df_tests = pd.read_csv(testIdsPath)
+df_tests['testid'] = pd.to_numeric(df_tests['testid'])
+for i, row in df_tests.iterrows():
+    df_tests.at[i,'testdescr'] = "ch"+ str(row['channel'])+ " " + "mcs"+ str(row['mcs'])+ " " + "f_r"+str(row['FEC_r'])+ " " +str(row['bandwidth']) + " " + "s" + str(row['stbc']) + " " + str(row['mtu'])
+
+
 
 
 #containers
@@ -61,6 +67,10 @@ for idx,oneTestPosPath in enumerate(testPositions):
             df_copyT['mean_signal_dbm'] = np.mean(df_copy['current_signal_dbm'])
             df_copyT['testid'] = testId
             df_copyT['testPosition'] = testPositionsDirNames[idx]
+            #df_copyT['nettoData'] = (df_copy['received_block_cnt'][-1]-df_copy['damaged_block_cnt'][-1])*df_tests[df_tests["testid"] == testId]
+
+            #damaged_block_cnt
+
 
             maxValuesOneAdapter[oneAdapterIdx].append(df_copyT)
 
@@ -92,7 +102,7 @@ plt_height=5
 plt_name = "wfb DataRateNetto Mbit_s"
 allTestPositons={testPositionsDirName : df_resultsNettoDataSize[df_resultsNettoDataSize.testPosition == testPositionsDirName].DataRateNetto.values for testPositionsDirName in testPositionsDirNames}
 df = pd.DataFrame(allTestPositons, index=df_tests['testdescr'])
-yticks = [1 * i for i in range(6)]
+yticks = [0.5 * i for i in range(8)]
 ax = df.plot.bar(rot=90,grid=True, figsize=(plt_width,plt_height), yticks=yticks, title=plt_name)
 plt.tight_layout()
 plt.savefig( os.path.join(path,plt_name+'.png'))
