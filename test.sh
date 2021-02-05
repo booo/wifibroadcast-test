@@ -1,5 +1,6 @@
 INTERFACE="mon0 mon1"
 DATA_DIR="/root/foo/searchwing-wifibroadcast-test"
+PHYS="phy0 phy1"
 WFB_DIR="/usr/bin/"
 BREAK=1
 WARM_UP=2
@@ -46,13 +47,21 @@ do
 
       for if in ${ifs}
       do
-         (tcpdump -i ${if} -w "${DATA_DIR}/searchwing-tcpdump-mon0-${testid}.pcap") & tcpdump_pid=$!
+         (tcpdump -i ${if} -w "${DATA_DIR}/searchwing-tcpdump-${if}-${testid}.pcap") & tcpdump_pid=$!
       done
-      (mkdir -p "${DATA_DIR}/${testid}-ieee80211" && cp -r /sys/kernel/debug/ieee80211 "${DATA_DIR}/${testid}-ieee80211/start") &
+      for phy in ${PHYS}
+      do
+        DEBUG_FILES="/sys/kernel/debug/ieee80211/${phy}/statistics/dot11FCSErrorCount /sys/kernel/debug/ieee80211/${phy}/ath9k/recv /sys/kernel/debug/ieee80211/${phy}/ath9k/phy_err /sys/kernel/debug/ieee80211/${phy}/ath9k/dump_nfcal"
+        (mkdir -p "${DATA_DIR}/${testid}-ieee80211/${phy}/start" && cp ${DEBUG_FILES} "${DATA_DIR}/${testid}-ieee80211/${phy}/start/") &
+      done
       (${WFB_DIR}/rx -r ${FEC_r} -b ${FEC_d} ${INTERFACE} > "${DATA_DIR}/searchwing-${testid}.data") & pid=$!
       (${WFB_DIR}/rx_status_csv -f "${DATA_DIR}/searchwing-debug-${testid}.csv") &
       sleep $((${WORK_TIME} + ${WARM_UP} + ${WARM_UP}))
-      (cp -r /sys/kernel/debug/ieee80211 "${DATA_DIR}/${testid}-ieee80211/end") &
+      for phy in ${PHYS}
+      do
+        DEBUG_FILES="/sys/kernel/debug/ieee80211/${phy}/statistics/dot11FCSErrorCount /sys/kernel/debug/ieee80211/${phy}/ath9k/recv /sys/kernel/debug/ieee80211/${phy}/ath9k/phy_err /sys/kernel/debug/ieee80211/${phy}/ath9k/dump_nfcal"
+        (mkdir -p "${DATA_DIR}/${testid}-ieee80211/${phy}/end" && cp ${DEBUG_FILES} "${DATA_DIR}/${testid}-ieee80211/${phy}/end/") &
+      done
       killall rx &
       killall tcpdump &
       killall rx_status_csv &
