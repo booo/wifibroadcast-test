@@ -14,7 +14,7 @@ ifs=$(echo $INTERFACE | tr " " "\n")
 sysctl net.core.bpf_jit_enable=0
 
 first=1
-while IFS=, read -r testid FEC_d FEC_r mcs Txpower stbc ldpc bandwidth mtu channel
+while IFS=, read -r testid FEC_d FEC_r mcs Txpower stbc ldpc bandwidth mtu channel antennas
 do
     read up rest </proc/uptime; start="${up%.*}${up#*.}"
     if [ ${first} == 1 ]; then
@@ -22,12 +22,13 @@ do
         continue
     fi
 
-    echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth} mtu ${mtu} channel: ${channel}"
+    echo "Starting test testid: ${testid} fec_d: ${FEC_d} fec_r: ${FEC_r} mcs: ${mcs} txpower: ${Txpower} stbc: ${stbc} ldpc: ${ldpc} bandwidth: ${bandwidth} mtu ${mtu} channel: ${channel} antennas: ${antennas}"
 
     for if in ${ifs}
     do
        iw dev ${if} set monitor otherbss fcsfail &
        iw dev ${if} set channel ${channel} ${bandwidth} &
+       ip link set ${if} down && iw phy phy0 set antenna ${antennas} ${antennas} && ip link set ${if} up &
     done
 
     #setup interface
