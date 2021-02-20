@@ -1,3 +1,3 @@
 testid,FEC_d,FEC_r,mcs,Txpower,stbc,ldpc,bandwidth,mtu,channel,antennas
-0,8,4,0,30,0,1,5MHz,1000,11,3
-1,8,4,0,30,1,1,5MHz,1000,11,3
+0,8,4,0,30,0,1,5MHz,1000,6,3
+1,8,4,0,30,0,1,5MHz,1000,11,3

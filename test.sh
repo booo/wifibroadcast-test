@@ -28,7 +28,7 @@ do
     do
        iw dev ${if} set monitor otherbss fcsfail &
        iw dev ${if} set channel ${channel} ${bandwidth} &
-       ip link set ${if} down && iw phy phy0 set antenna ${antennas} ${antennas} && ip link set ${if} up &
+       #ip link set ${if} down && iw phy phy0 set antenna ${antennas} ${antennas} && ip link set ${if} up &
     done
 
     #setup interface
